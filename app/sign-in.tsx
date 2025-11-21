@@ -1,11 +1,11 @@
 import { Formik } from "formik";
 import React, { useState } from "react";
 import {
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import * as Yup from "yup";
 
@@ -128,6 +128,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 20,
     alignItems: "center",
+    width: "100%",
   },
   buttonText: {
     color: "white",
