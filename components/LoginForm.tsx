@@ -4,11 +4,11 @@ import { Link } from "expo-router";
 import { Formik } from "formik";
 import React from "react";
 import {
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import * as Yup from "yup";
 
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#ffffff",
     width: 400,
-    height: 600,
+    height: 560,
     padding: 20,
     paddingVertical: 20,
     borderRadius: 20,
