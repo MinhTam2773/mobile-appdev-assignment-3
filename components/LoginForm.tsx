@@ -4,11 +4,11 @@ import { Link } from "expo-router";
 import { Formik } from "formik";
 import React from "react";
 import {
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import * as Yup from "yup";
 
@@ -27,6 +27,7 @@ const signInSchema = Yup.object().shape({
 const LoginForm = () => {
   const handleLogin = async (values: SignInFormValues) => {
     try {
+      alert("Logged in!")
       console.log(values);
     } catch (error: any) {
       console.log(error);
@@ -39,21 +40,30 @@ const LoginForm = () => {
         Login with your Apple or Google account
       </Text>
 
-      <View style={styles.oauthLoginContainer}>
-        <AntDesign name="apple" size={20} color="black" />
-        <Text style={styles.oauthLoginText}>Login with Apple</Text>
-      </View>
-      <View style={styles.oauthLoginContainer}>
-        <FontAwesome name="google" size={20} color="black" />
-        <Text style={styles.oauthLoginText}>Login with Google</Text>
-      </View>
+      {/* OAuth Container */}
+      <TouchableOpacity>
+        <View style={styles.oauthLoginContainer}>
+          <AntDesign name="apple" size={20} color="black" />
+          <Text style={styles.oauthLoginText}>Login with Apple</Text>
+        </View>
+      </TouchableOpacity>
+      
+      <TouchableOpacity>
+        <View style={styles.oauthLoginContainer}>
+          <FontAwesome name="google" size={20} color="black" />
+          <Text style={styles.oauthLoginText}>Login with Google</Text>
+        </View>
+      </TouchableOpacity>
+      
 
+      {/* Divider between OAuth and the sign in fields */}
       <View style={styles.dividerContainer}>
         <View style={styles.hr}></View>
         <Text style={{color: 'gray'}}>Or continue with</Text>
         <View style={styles.hr}></View>
       </View>
 
+      {/* Sign In Fields */}
       <Formik<SignInFormValues>
         initialValues={{ email: "", password: "" }}
         validationSchema={signInSchema}
