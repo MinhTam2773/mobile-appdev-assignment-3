@@ -281,7 +281,7 @@ const MusicSignUpPage = () => {
 export default MusicSignUpPage;
 
 const styles = StyleSheet.create({
-  // 背景
+  // background
   screen: {
     flexGrow: 1,
     backgroundColor: "#e5e7eb",
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 16,
   },
-  // 卡片
+  // card
   card: {
     backgroundColor: "#ffffff",
     borderRadius: 24,
@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
     fontWeight: "500",
   },
-  // 角色选择
+  // select the role
   roleRow: {
     flexDirection: "row",
     gap: 8,
@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
     color: "#111827",
     fontWeight: "600",
   },
-  // 条款勾选
+  // checkbox styles
   termsRow: {
     flexDirection: "row",
     alignItems: "center",
