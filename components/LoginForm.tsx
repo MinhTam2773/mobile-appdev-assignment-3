@@ -1,37 +1,58 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Link } from "expo-router";
 import { Formik } from "formik";
-import React from "react";
+import React, { useState } from "react";
 import {
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import * as Yup from "yup";
+
+import { auth } from "../lib/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 interface SignInFormValues {
   email: string;
   password: string;
+  confirmPassword: string;
 }
+
 const signInSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Email is required"),
   password: Yup.string()
     .min(6, "Password is at least 6 characters")
     .max(20, "Password must not pass 20 characters")
-    .required(),
+    .required("Password is required"),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref("password")], "Passwords must match")
+    .required("Confirm your password"),
 });
 
 const LoginForm = () => {
+  const [firebaseError, setFirebaseError] = useState<string | null>(null);
+
   const handleLogin = async (values: SignInFormValues) => {
     try {
-      console.log(values);
+      setFirebaseError(null);
+
+      if (values.password !== values.confirmPassword) {
+        setFirebaseError("Passwords do not match.");
+        return;
+      }
+
+      await signInWithEmailAndPassword(auth, values.email, values.password);
+
+      alert("Login successful.");
     } catch (error: any) {
       console.log(error);
+      setFirebaseError(error.message || "Login failed.");
     }
   };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome Back</Text>
@@ -50,12 +71,12 @@ const LoginForm = () => {
 
       <View style={styles.dividerContainer}>
         <View style={styles.hr}></View>
-        <Text style={{color: 'gray'}}>Or continue with</Text>
+        <Text style={{ color: "gray" }}>Or continue with</Text>
         <View style={styles.hr}></View>
       </View>
 
       <Formik<SignInFormValues>
-        initialValues={{ email: "", password: "" }}
+        initialValues={{ email: "", password: "", confirmPassword: "" }}
         validationSchema={signInSchema}
         onSubmit={handleLogin}
       >
@@ -68,6 +89,7 @@ const LoginForm = () => {
           touched,
         }) => (
           <>
+            {/* Email */}
             <Text style={styles.label}>Email</Text>
             <TextInput
               style={styles.input}
@@ -82,9 +104,18 @@ const LoginForm = () => {
               <Text style={styles.error}>{errors.email}</Text>
             )}
 
-            <View style={{flexDirection: "row", justifyContent: 'space-between', alignItems: 'flex-end'}}>
-                <Text style={styles.label}>Password</Text>
-                <Text style={{fontWeight: '500', color: '#494751'}}>Forgot your password?</Text>
+            {/* Password */}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "flex-end",
+              }}
+            >
+              <Text style={styles.label}>Password</Text>
+              <Text style={{ fontWeight: "500", color: "#494751" }}>
+                Forgot your password?
+              </Text>
             </View>
             <TextInput
               style={styles.input}
@@ -99,7 +130,22 @@ const LoginForm = () => {
               <Text style={styles.error}>{errors.password}</Text>
             )}
 
-            {/* {firebaseError && <Text style={styles.error}>{firebaseError}</Text>} */}
+            {/* Confirm Password */}
+            <Text style={styles.label}>Confirm Password</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Confirm password"
+              value={values.confirmPassword}
+              onChangeText={handleChange("confirmPassword")}
+              onBlur={handleBlur("confirmPassword")}
+              secureTextEntry
+              autoCapitalize="none"
+            />
+            {touched.confirmPassword && errors.confirmPassword && (
+              <Text style={styles.error}>{errors.confirmPassword}</Text>
+            )}
+
+            {firebaseError && <Text style={styles.error}>{firebaseError}</Text>}
 
             <TouchableOpacity
               style={styles.button}
@@ -111,7 +157,12 @@ const LoginForm = () => {
         )}
       </Formik>
 
-      <Text style={styles.closingText}>No account? <Link href={'/sign-up'} style={styles.link}>Sign up</Link></Text>
+      <Text style={styles.closingText}>
+        No account?{" "}
+        <Link href={"/sign-up"} style={styles.link}>
+          Sign up
+        </Link>
+      </Text>
     </View>
   );
 };
@@ -131,7 +182,7 @@ const styles = StyleSheet.create({
   },
   oauthLoginContainer: {
     flexDirection: "row",
-    justifyContent: 'center',
+    justifyContent: "center",
     gap: 10,
     width: "100%",
     borderWidth: 1,
@@ -143,7 +194,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   oauthLoginText: {
-    fontWeight: "600"
+    fontWeight: "600",
   },
   title: {
     fontSize: 20,
@@ -158,21 +209,21 @@ const styles = StyleSheet.create({
   },
   dividerContainer: {
     flexDirection: "row",
-    marginTop: 30, 
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    marginTop: 30,
+    justifyContent: "space-between",
+    alignItems: "center",
     gap: 10,
     marginBottom: 10,
-  }, 
+  },
   hr: {
     width: "32%",
     height: 1,
-    backgroundColor: '#e9e8ed'
+    backgroundColor: "#e9e8ed",
   },
   label: {
-    fontWeight: '600',
+    fontWeight: "600",
     marginTop: 10,
-  }, 
+  },
   input: {
     width: "100%",
     borderWidth: 1,
@@ -181,7 +232,6 @@ const styles = StyleSheet.create({
     padding: 12,
     marginTop: 2,
     backgroundColor: "#ffffff",
-    // marginBottom: 15,
   },
   error: {
     color: "red",
@@ -203,10 +253,10 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   closingText: {
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 19,
   },
   link: {
-    textDecorationLine: 'underline'
-  }
+    textDecorationLine: "underline",
+  },
 });
