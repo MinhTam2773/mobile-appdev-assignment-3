@@ -12,46 +12,47 @@ import * as Yup from "yup";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 
-interface MusicSignUpFormValues {
-  displayName: string;
+interface EmployeeFormValues {
+  employeeName: string;
   email: string;
-  password: string;
-  confirmPassword: string;
-  favoriteGenre: string;
-  role: "listener" | "artist" | "";
+  phone: string;
+  department: string;
+  position: string;
+  employeeId: string;
   acceptTerms: boolean;
 }
 
-const musicSignUpValidation = Yup.object().shape({
-  displayName: Yup.string()
+const employeeValidation = Yup.object().shape({
+  employeeName: Yup.string()
     .min(2, "Name must be at least 2 characters")
-    .max(40, "Maximum 40 characters")
-    .required("Display name is required"),
+    .required("Employee name is required"),
+
   email: Yup.string().email("Invalid Email").required("Email is required"),
-  password: Yup.string()
-    .min(6, "At least 6 characters")
-    .max(20, "Maximum 20 characters")
-    .required("Password is required"),
-  confirmPassword: Yup.string()
-    .oneOf([Yup.ref("password")], "Passwords must match")
-    .required("Confirm your password"),
-  favoriteGenre: Yup.string()
-    .min(2, "Please enter a genre")
-    .required("Favorite genre is required"),
-  role: Yup.string()
-    .oneOf(["listener", "artist"], "Please select your role")
-    .required("Role is required"),
-  acceptTerms: Yup.bool().oneOf(
-    [true],
-    "You must accept the terms & conditions"
-  ),
+
+  phone: Yup.string()
+    .matches(/^[0-9]{10,15}$/, "Enter a valid phone number")
+    .required("Phone number is required"),
+
+  department: Yup.string()
+    .min(2, "Please enter a department")
+    .required("Department is required"),
+
+  position: Yup.string()
+    .min(2, "Please enter a job position")
+    .required("Position is required"),
+
+  employeeId: Yup.string()
+    .min(3, "Employee ID must be at least 3 characters")
+    .required("Employee ID is required"),
+
+  acceptTerms: Yup.bool().oneOf([true], "You must accept the company policies"),
 });
 
-const MusicSignUpPage = () => {
-  const handleSignUp = async (values: MusicSignUpFormValues) => {
+const EmployeeFormPage = () => {
+  const handleSubmitForm = async (values: EmployeeFormValues) => {
     try {
       console.log(values);
-      alert("Music sign up success! (Check console)");
+      alert("Employee information submitted. (See console)");
     } catch (error: any) {
       alert(error.message);
     }
@@ -59,75 +60,51 @@ const MusicSignUpPage = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.screen}>
-      {/* Card */}
       <View style={styles.card}>
-        {/* Header */}
-        <Text style={styles.title}>Create Music Account</Text>
-        <Text style={styles.subtitle}>
-          Join our music community to build playlists and follow your favourite
-          artists.
-        </Text>
+        <Text style={styles.title}>Employee Information</Text>
+        <Text style={styles.subtitle}>Fill in the employee details below.</Text>
 
-        {/* Social buttons */}
-        <TouchableOpacity style={styles.socialButton}>
-          <Ionicons name="logo-apple" size={20} color="#111827" />
-          <Text style={styles.socialButtonText}>Sign up with Apple</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.socialButton}>
-          <Ionicons name="logo-google" size={20} color="#111827" />
-          <Text style={styles.socialButtonText}>Sign up with Google</Text>
-        </TouchableOpacity>
-
-        {/* Divider */}
-        <View style={styles.dividerRow}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>Or create with email</Text>
-          <View style={styles.dividerLine} />
-        </View>
-
-        {/* Formik form */}
-        <Formik<MusicSignUpFormValues>
+        <Formik<EmployeeFormValues>
           initialValues={{
-            displayName: "",
+            employeeName: "",
             email: "",
-            password: "",
-            confirmPassword: "",
-            favoriteGenre: "",
-            role: "",
+            phone: "",
+            department: "",
+            position: "",
+            employeeId: "",
             acceptTerms: false,
           }}
-          validationSchema={musicSignUpValidation}
-          onSubmit={handleSignUp}
+          validationSchema={employeeValidation}
+          onSubmit={handleSubmitForm}
         >
           {({
             handleChange,
             handleBlur,
             handleSubmit,
-            setFieldValue,
             values,
             errors,
             touched,
+            setFieldValue,
           }) => (
             <View style={{ width: "100%" }}>
-              {/* Display Name */}
-              <Text style={styles.label}>Display Name</Text>
+              {/* Employee Name */}
+              <Text style={styles.label}>Employee Name</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Your name or stage name"
-                value={values.displayName}
-                onChangeText={handleChange("displayName")}
-                onBlur={handleBlur("displayName")}
+                placeholder="Enter full name"
+                value={values.employeeName}
+                onChangeText={handleChange("employeeName")}
+                onBlur={handleBlur("employeeName")}
               />
-              {touched.displayName && errors.displayName && (
-                <Text style={styles.error}>{errors.displayName}</Text>
+              {touched.employeeName && errors.employeeName && (
+                <Text style={styles.error}>{errors.employeeName}</Text>
               )}
 
               {/* Email */}
               <Text style={styles.label}>Email</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Enter your email"
+                placeholder="Enter email address"
                 value={values.email}
                 onChangeText={handleChange("email")}
                 onBlur={handleBlur("email")}
@@ -138,99 +115,60 @@ const MusicSignUpPage = () => {
                 <Text style={styles.error}>{errors.email}</Text>
               )}
 
-              {/* Password */}
-              <Text style={styles.label}>Password</Text>
+              {/* Phone */}
+              <Text style={styles.label}>Phone</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Password"
-                secureTextEntry
-                value={values.password}
-                onChangeText={handleChange("password")}
-                onBlur={handleBlur("password")}
+                placeholder="Enter phone number"
+                value={values.phone}
+                onChangeText={handleChange("phone")}
+                onBlur={handleBlur("phone")}
+                keyboardType="number-pad"
               />
-              {touched.password && errors.password && (
-                <Text style={styles.error}>{errors.password}</Text>
+              {touched.phone && errors.phone && (
+                <Text style={styles.error}>{errors.phone}</Text>
               )}
 
-              {/* Confirm Password */}
-              <Text style={styles.label}>Confirm Password</Text>
+              {/* Department */}
+              <Text style={styles.label}>Department</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Confirm password"
-                secureTextEntry
-                value={values.confirmPassword}
-                onChangeText={handleChange("confirmPassword")}
-                onBlur={handleBlur("confirmPassword")}
+                placeholder="e.g. HR, IT, Finance"
+                value={values.department}
+                onChangeText={handleChange("department")}
+                onBlur={handleBlur("department")}
               />
-              {touched.confirmPassword && errors.confirmPassword && (
-                <Text style={styles.error}>{errors.confirmPassword}</Text>
+              {touched.department && errors.department && (
+                <Text style={styles.error}>{errors.department}</Text>
               )}
 
-              {/* Favorite Genre */}
-              <Text style={styles.label}>Favorite Genre</Text>
+              {/* Position */}
+              <Text style={styles.label}>Position</Text>
               <TextInput
                 style={styles.input}
-                placeholder="e.g. Pop, Rock, Hip-Hop"
-                value={values.favoriteGenre}
-                onChangeText={handleChange("favoriteGenre")}
-                onBlur={handleBlur("favoriteGenre")}
+                placeholder="e.g. Manager, Developer"
+                value={values.position}
+                onChangeText={handleChange("position")}
+                onBlur={handleBlur("position")}
               />
-              {touched.favoriteGenre && errors.favoriteGenre && (
-                <Text style={styles.error}>{errors.favoriteGenre}</Text>
+              {touched.position && errors.position && (
+                <Text style={styles.error}>{errors.position}</Text>
               )}
 
-              {/* Role selector */}
-              <Text style={styles.label}>I am a...</Text>
-              <View style={styles.roleRow}>
-                <TouchableOpacity
-                  style={[
-                    styles.roleButton,
-                    values.role === "listener" && styles.roleButtonActive,
-                  ]}
-                  onPress={() => setFieldValue("role", "listener")}
-                >
-                  <Ionicons
-                    name="headset-outline"
-                    size={18}
-                    color={values.role === "listener" ? "#111827" : "#6b7280"}
-                  />
-                  <Text
-                    style={[
-                      styles.roleButtonText,
-                      values.role === "listener" && styles.roleButtonTextActive,
-                    ]}
-                  >
-                    Listener
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.roleButton,
-                    values.role === "artist" && styles.roleButtonActive,
-                  ]}
-                  onPress={() => setFieldValue("role", "artist")}
-                >
-                  <Ionicons
-                    name="mic-outline"
-                    size={18}
-                    color={values.role === "artist" ? "#111827" : "#6b7280"}
-                  />
-                  <Text
-                    style={[
-                      styles.roleButtonText,
-                      values.role === "artist" && styles.roleButtonTextActive,
-                    ]}
-                  >
-                    Artist
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              {touched.role && errors.role && (
-                <Text style={styles.error}>{errors.role}</Text>
+              {/* Employee ID */}
+              <Text style={styles.label}>Employee ID</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="e.g. EMP001"
+                value={values.employeeId}
+                onChangeText={handleChange("employeeId")}
+                onBlur={handleBlur("employeeId")}
+              />
+              {touched.employeeId && errors.employeeId && (
+                <Text style={styles.error}>{errors.employeeId}</Text>
               )}
 
-              {/* Accept terms */}
+              {/* Terms */}
               <TouchableOpacity
                 style={styles.termsRow}
                 onPress={() =>
@@ -244,30 +182,30 @@ const MusicSignUpPage = () => {
                   ]}
                 >
                   {values.acceptTerms && (
-                    <Ionicons name="checkmark" size={12} color="#ffffff" />
+                    <Ionicons name="checkmark" size={12} color="#fff" />
                   )}
                 </View>
                 <Text style={styles.termsText}>
-                  I agree to the Terms of Service and Privacy Policy.
+                  I confirm the above employee information is accurate.
                 </Text>
               </TouchableOpacity>
               {errors.acceptTerms && (
                 <Text style={styles.error}>{errors.acceptTerms}</Text>
               )}
 
-              {/* Button */}
+              {/* Submit Button */}
               <TouchableOpacity
                 style={styles.button}
                 onPress={handleSubmit as any}
               >
-                <Text style={styles.buttonText}>Sign Up</Text>
+                <Text style={styles.buttonText}>Submit</Text>
               </TouchableOpacity>
 
-              {/* Footer link */}
+              {/* Footer */}
               <View style={styles.footerRow}>
-                <Text style={styles.footerText}>Already have an account? </Text>
-                <Link href={"/sign-in"} style={styles.link}>
-                  Login
+                <Text style={styles.footerText}>Go back to </Text>
+                <Link href={"/"} style={styles.link}>
+                  Home
                 </Link>
               </View>
             </View>
@@ -278,10 +216,9 @@ const MusicSignUpPage = () => {
   );
 };
 
-export default MusicSignUpPage;
+export default EmployeeFormPage;
 
 const styles = StyleSheet.create({
-  // background
   screen: {
     flexGrow: 1,
     backgroundColor: "#e5e7eb",
@@ -289,18 +226,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 16,
   },
-  // card
   card: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#fff",
     borderRadius: 24,
-    paddingVertical: 24,
-    paddingHorizontal: 20,
+    padding: 24,
     width: "100%",
     maxWidth: 420,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 12,
     elevation: 4,
   },
   title: {
@@ -316,38 +247,6 @@ const styles = StyleSheet.create({
     color: "#6b7280",
     marginBottom: 20,
   },
-  socialButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 999,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    marginBottom: 10,
-    backgroundColor: "#ffffff",
-  },
-  socialButtonText: {
-    marginLeft: 8,
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#111827",
-  },
-  dividerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 16,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#e5e7eb",
-  },
-  dividerText: {
-    marginHorizontal: 8,
-    fontSize: 12,
-    color: "#9ca3af",
-  },
   label: {
     fontSize: 14,
     fontWeight: "500",
@@ -360,8 +259,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#d1d5db",
     borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    padding: 12,
     backgroundColor: "#f9fafb",
     fontSize: 15,
   },
@@ -369,6 +267,31 @@ const styles = StyleSheet.create({
     color: "red",
     fontSize: 12,
     marginTop: 4,
+  },
+  termsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
+  },
+  checkbox: {
+    width: 18,
+    height: 18,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 8,
+    backgroundColor: "#fff",
+  },
+  checkboxChecked: {
+    backgroundColor: "#111827",
+    borderColor: "#111827",
+  },
+  termsText: {
+    flex: 1,
+    fontSize: 12,
+    color: "#4b5563",
   },
   button: {
     backgroundColor: "#111827",
@@ -378,7 +301,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonText: {
-    color: "white",
+    color: "#fff",
     fontSize: 16,
     fontWeight: "600",
   },
@@ -394,61 +317,5 @@ const styles = StyleSheet.create({
   link: {
     textDecorationLine: "underline",
     fontWeight: "500",
-  },
-  // select the role
-  roleRow: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  roleButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 999,
-    paddingVertical: 8,
-    marginTop: 4,
-    backgroundColor: "#ffffff",
-  },
-  roleButtonActive: {
-    backgroundColor: "#e5e7eb",
-    borderColor: "#6b7280",
-  },
-  roleButtonText: {
-    marginLeft: 6,
-    fontSize: 13,
-    color: "#6b7280",
-  },
-  roleButtonTextActive: {
-    color: "#111827",
-    fontWeight: "600",
-  },
-  // checkbox styles
-  termsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 12,
-  },
-  checkbox: {
-    width: 18,
-    height: 18,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: "#d1d5db",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 8,
-    backgroundColor: "#ffffff",
-  },
-  checkboxChecked: {
-    backgroundColor: "#111827",
-    borderColor: "#111827",
-  },
-  termsText: {
-    flex: 1,
-    fontSize: 12,
-    color: "#4b5563",
   },
 });
