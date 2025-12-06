@@ -1,5 +1,5 @@
 import { Formik } from "formik";
-import React from "react";
+import React, { useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -11,6 +11,10 @@ import {
 import * as Yup from "yup";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
+import { auth, db } from "../lib/firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useRouter } from "expo-router";
 
 interface EmployeeFormValues {
   employeeName: string;
@@ -19,6 +23,8 @@ interface EmployeeFormValues {
   department: string;
   position: string;
   employeeId: string;
+  password: string;
+  confirmPassword: string;
   acceptTerms: boolean;
 }
 
@@ -45,24 +51,61 @@ const employeeValidation = Yup.object().shape({
     .min(3, "Employee ID must be at least 3 characters")
     .required("Employee ID is required"),
 
+  password: Yup.string()
+    .min(6, "Password must be at least 6 characters")
+    .max(20, "Password must not be longer than 20 characters")
+    .required("Password is required"),
+
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref("password")], "Passwords must match")
+    .required("Confirm your password"),
+
   acceptTerms: Yup.bool().oneOf([true], "You must accept the company policies"),
 });
 
 const EmployeeFormPage = () => {
+  const [firebaseError, setFirebaseError] = useState<string | null>(null);
+  const router = useRouter();
+
   const handleSubmitForm = async (values: EmployeeFormValues) => {
     try {
-      console.log(values);
-      alert("Employee information submitted. (See console)");
+      setFirebaseError(null);
+
+      // 1) Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        values.email,
+        values.password
+      );
+      const user = userCredential.user;
+
+      // 2) Save employee profile in Firestore (do NOT store password)
+      await addDoc(collection(db, "employees"), {
+        uid: user.uid,
+        name: values.employeeName,
+        email: values.email,
+        phone: values.phone,
+        department: values.department,
+        position: values.position,
+        employeeId: values.employeeId,
+        createdAt: serverTimestamp(),
+      });
+
+      alert("Employee account created successfully.");
+      router.replace("/sign-in");
     } catch (error: any) {
-      alert(error.message);
+      console.log("Sign up error:", error);
+      setFirebaseError(error.message || "Sign up failed.");
     }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.screen}>
       <View style={styles.card}>
-        <Text style={styles.title}>Employee Information</Text>
-        <Text style={styles.subtitle}>Fill in the employee details below.</Text>
+        <Text style={styles.title}>Employee Sign Up</Text>
+        <Text style={styles.subtitle}>
+          Create an employee account with your details.
+        </Text>
 
         <Formik<EmployeeFormValues>
           initialValues={{
@@ -72,6 +115,8 @@ const EmployeeFormPage = () => {
             department: "",
             position: "",
             employeeId: "",
+            password: "",
+            confirmPassword: "",
             acceptTerms: false,
           }}
           validationSchema={employeeValidation}
@@ -168,7 +213,42 @@ const EmployeeFormPage = () => {
                 <Text style={styles.error}>{errors.employeeId}</Text>
               )}
 
-              {/* Terms */}
+              {/* Password */}
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter password"
+                value={values.password}
+                onChangeText={handleChange("password")}
+                onBlur={handleBlur("password")}
+                secureTextEntry
+                autoCapitalize="none"
+              />
+              {touched.password && errors.password && (
+                <Text style={styles.error}>{errors.password}</Text>
+              )}
+
+              {/* Confirm Password */}
+              <Text style={styles.label}>Confirm Password</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Confirm password"
+                value={values.confirmPassword}
+                onChangeText={handleChange("confirmPassword")}
+                onBlur={handleBlur("confirmPassword")}
+                secureTextEntry
+                autoCapitalize="none"
+              />
+              {touched.confirmPassword && errors.confirmPassword && (
+                <Text style={styles.error}>{errors.confirmPassword}</Text>
+              )}
+
+              {/* Firebase error */}
+              {firebaseError && (
+                <Text style={styles.error}>{firebaseError}</Text>
+              )}
+
+              {/* Accept terms */}
               <TouchableOpacity
                 style={styles.termsRow}
                 onPress={() =>
@@ -186,7 +266,8 @@ const EmployeeFormPage = () => {
                   )}
                 </View>
                 <Text style={styles.termsText}>
-                  I confirm the above employee information is accurate.
+                  I confirm the above employee information is accurate and I
+                  accept the company policies.
                 </Text>
               </TouchableOpacity>
               {errors.acceptTerms && (
@@ -198,14 +279,14 @@ const EmployeeFormPage = () => {
                 style={styles.button}
                 onPress={handleSubmit as any}
               >
-                <Text style={styles.buttonText}>Submit</Text>
+                <Text style={styles.buttonText}>Sign Up</Text>
               </TouchableOpacity>
 
               {/* Footer */}
               <View style={styles.footerRow}>
-                <Text style={styles.footerText}>Go back to </Text>
-                <Link href={"/"} style={styles.link}>
-                  Home
+                <Text style={styles.footerText}>Already have an account? </Text>
+                <Link href={"/sign-in"} style={styles.link}>
+                  Login
                 </Link>
               </View>
             </View>
