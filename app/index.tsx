@@ -7,20 +7,23 @@ This application will show the use of creating multiple forms using the 'Formik'
 and 'Yup' for validation within an Expo project.
 Both Formik and Yup must be installed through the Node Package Manager.
 
+For the purpose of this assignment, 
+it pretends to be the front-end of a music app. (like spotify)
+
 Commands:
 npm install formik
 npm install yup
 
 Requirements:
-1. Employee Information Form
-  - Develop a form for employee info with 5 fields.
+1. Account Information Form
+  - Develop a form for account info with 5 fields.
   - Validate this form using 'Yup'.
-  - Employee
-      - Full Name
-      - Username
+  - Account
+      - Display Name
       - Email
-      - Phone Number
       - Password
+      - Favorite Genre
+      - Role (listener or artist)
       
 2. Authentication Forms
   - Create two additional forms:
@@ -41,12 +44,12 @@ export default function Index() {
       style={styles.mainContainer}
     >
       {/* Header */}
-      <Text style={styles.headerText}>Welcome to FORMS</Text>
+      <Text style={styles.headerText}>Welcome to Sybautify!</Text>
 
       {/* Sign In + Sign Up buttons */}
       <View style={styles.authContainer}>
-        <TouchableOpacity onPress={() => router.push('/sign-in')} style={styles.button}>
-          <Text>Sign In</Text>
+        <TouchableOpacity onPress={() => router.push('/sign-in')} style={styles.signInButton}>
+          <Text style={{color: '#ffffff'}}>Sign In</Text>
           </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push('/sign-up')} style={styles.button}>
@@ -82,6 +85,20 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     backgroundColor:'#FFFFFF',
+    borderColor: '#C8C6C6',
+    borderWidth: 1,
+    paddingVertical: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: 10,
+    padding: 5,
+    borderRadius: 10,
+    fontWeight: '500',
+    fontSize: 20,
+  },
+  signInButton: {
+    flex: 1,
+    backgroundColor:'#000000ff',
     borderColor: '#C8C6C6',
     borderWidth: 1,
     paddingVertical: 5,

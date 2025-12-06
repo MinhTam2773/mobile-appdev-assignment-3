@@ -12,8 +12,8 @@ import {
 } from "react-native";
 import * as Yup from "yup";
 
-import { auth } from "../lib/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../lib/firebase";
 
 interface SignInFormValues {
   email: string;
@@ -47,6 +47,7 @@ const LoginForm = () => {
       await signInWithEmailAndPassword(auth, values.email, values.password);
 
       alert("Login successful.");
+      console.log(values);
     } catch (error: any) {
       console.log(error);
       setFirebaseError(error.message || "Login failed.");
@@ -60,21 +61,29 @@ const LoginForm = () => {
         Login with your Apple or Google account
       </Text>
 
-      <View style={styles.oauthLoginContainer}>
-        <AntDesign name="apple" size={20} color="black" />
-        <Text style={styles.oauthLoginText}>Login with Apple</Text>
-      </View>
-      <View style={styles.oauthLoginContainer}>
-        <FontAwesome name="google" size={20} color="black" />
-        <Text style={styles.oauthLoginText}>Login with Google</Text>
-      </View>
+      {/* OAuth Container */}
+      <TouchableOpacity>
+        <View style={styles.oauthLoginContainer}>
+          <AntDesign name="apple" size={20} color="black" />
+          <Text style={styles.oauthLoginText}>Login with Apple</Text>
+        </View>
+      </TouchableOpacity>
 
+      <TouchableOpacity>
+        <View style={styles.oauthLoginContainer}>
+          <FontAwesome name="google" size={20} color="black" />
+          <Text style={styles.oauthLoginText}>Login with Google</Text>
+        </View>
+      </TouchableOpacity>
+
+      {/* Divider between OAuth and the sign in fields */}
       <View style={styles.dividerContainer}>
         <View style={styles.hr}></View>
         <Text style={{ color: "gray" }}>Or continue with</Text>
         <View style={styles.hr}></View>
       </View>
 
+      {/* Sign In Fields */}
       <Formik<SignInFormValues>
         initialValues={{ email: "", password: "", confirmPassword: "" }}
         validationSchema={signInSchema}
