@@ -1,4 +1,4 @@
-import SigninForm from "@/components/SignupForm";
+import SignUpForm from "@/components/SignupForm";
 import React from "react";
 import { View } from "react-native";
 
@@ -11,7 +11,7 @@ const SigupPage = () => {
         alignItems: "center",
       }}
     >
-      <SigninForm />
+      <SignUpForm />
     </View>
   );
 };

@@ -1,6 +1,4 @@
-import AntDesign from "@expo/vector-icons/AntDesign";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { Formik } from "formik";
 import React, { useState } from "react";
 import {
@@ -27,9 +25,6 @@ const signInSchema = Yup.object().shape({
     .min(6, "Password is at least 6 characters")
     .max(20, "Password must not pass 20 characters")
     .required("Password is required"),
-  confirmPassword: Yup.string()
-    .oneOf([Yup.ref("password")], "Passwords must match")
-    .required("Confirm your password"),
 });
 
 const LoginForm = () => {
@@ -39,15 +34,9 @@ const LoginForm = () => {
     try {
       setFirebaseError(null);
 
-      if (values.password !== values.confirmPassword) {
-        setFirebaseError("Passwords do not match.");
-        return;
-      }
+      const user = await signInWithEmailAndPassword(auth, values.email, values.password);
 
-      await signInWithEmailAndPassword(auth, values.email, values.password);
-
-      alert("Login successful.");
-      console.log(values);
+      if (user.user) router.push('/home');
     } catch (error: any) {
       console.log(error);
       setFirebaseError(error.message || "Login failed.");
@@ -60,28 +49,6 @@ const LoginForm = () => {
       <Text style={styles.subtitle}>
         Login with your Apple or Google account
       </Text>
-
-      {/* OAuth Container */}
-      <TouchableOpacity>
-        <View style={styles.oauthLoginContainer}>
-          <AntDesign name="apple" size={20} color="black" />
-          <Text style={styles.oauthLoginText}>Login with Apple</Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity>
-        <View style={styles.oauthLoginContainer}>
-          <FontAwesome name="google" size={20} color="black" />
-          <Text style={styles.oauthLoginText}>Login with Google</Text>
-        </View>
-      </TouchableOpacity>
-
-      {/* Divider between OAuth and the sign in fields */}
-      <View style={styles.dividerContainer}>
-        <View style={styles.hr}></View>
-        <Text style={{ color: "gray" }}>Or continue with</Text>
-        <View style={styles.hr}></View>
-      </View>
 
       {/* Sign In Fields */}
       <Formik<SignInFormValues>
@@ -139,21 +106,6 @@ const LoginForm = () => {
               <Text style={styles.error}>{errors.password}</Text>
             )}
 
-            {/* Confirm Password */}
-            <Text style={styles.label}>Confirm Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Confirm password"
-              value={values.confirmPassword}
-              onChangeText={handleChange("confirmPassword")}
-              onBlur={handleBlur("confirmPassword")}
-              secureTextEntry
-              autoCapitalize="none"
-            />
-            {touched.confirmPassword && errors.confirmPassword && (
-              <Text style={styles.error}>{errors.confirmPassword}</Text>
-            )}
-
             {firebaseError && <Text style={styles.error}>{firebaseError}</Text>}
 
             <TouchableOpacity
@@ -182,7 +134,6 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#ffffff",
     width: 400,
-    height: 560,
     padding: 20,
     paddingVertical: 20,
     borderRadius: 20,
