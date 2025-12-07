@@ -1,3 +1,7 @@
+import { Ionicons } from "@expo/vector-icons";
+import { Link, useRouter } from "expo-router";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { Formik } from "formik";
 import React, { useState } from "react";
 import {
@@ -9,27 +13,20 @@ import {
   View,
 } from "react-native";
 import * as Yup from "yup";
-import { Ionicons } from "@expo/vector-icons";
-import { Link } from "expo-router";
 import { auth, db } from "../lib/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { useRouter } from "expo-router";
 
-interface EmployeeFormValues {
-  employeeName: string;
+
+interface SignUpFormValues {
+  name: string;
   email: string;
   phone: string;
-  department: string;
-  position: string;
-  employeeId: string;
   password: string;
   confirmPassword: string;
   acceptTerms: boolean;
 }
 
 const employeeValidation = Yup.object().shape({
-  employeeName: Yup.string()
+  name: Yup.string()
     .min(2, "Name must be at least 2 characters")
     .required("Employee name is required"),
 
@@ -38,18 +35,6 @@ const employeeValidation = Yup.object().shape({
   phone: Yup.string()
     .matches(/^[0-9]{10,15}$/, "Enter a valid phone number")
     .required("Phone number is required"),
-
-  department: Yup.string()
-    .min(2, "Please enter a department")
-    .required("Department is required"),
-
-  position: Yup.string()
-    .min(2, "Please enter a job position")
-    .required("Position is required"),
-
-  employeeId: Yup.string()
-    .min(3, "Employee ID must be at least 3 characters")
-    .required("Employee ID is required"),
 
   password: Yup.string()
     .min(6, "Password must be at least 6 characters")
@@ -63,11 +48,11 @@ const employeeValidation = Yup.object().shape({
   acceptTerms: Yup.bool().oneOf([true], "You must accept the company policies"),
 });
 
-const EmployeeFormPage = () => {
+const SignUpForm = () => {
   const [firebaseError, setFirebaseError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleSubmitForm = async (values: EmployeeFormValues) => {
+  const handleSubmitForm = async (values: SignUpFormValues) => {
     try {
       setFirebaseError(null);
 
@@ -78,21 +63,17 @@ const EmployeeFormPage = () => {
         values.password
       );
       const user = userCredential.user;
-
+      
       // 2) Save employee profile in Firestore (do NOT store password)
-      await addDoc(collection(db, "employees"), {
+      await addDoc(collection(db, "users"), {
         uid: user.uid,
-        name: values.employeeName,
+        name: values.name,
         email: values.email,
         phone: values.phone,
-        department: values.department,
-        position: values.position,
-        employeeId: values.employeeId,
         createdAt: serverTimestamp(),
       });
-
-      alert("Employee account created successfully.");
-      router.replace("/sign-in");
+      
+      if (user) router.push('/home');
     } catch (error: any) {
       console.log("Sign up error:", error);
       setFirebaseError(error.message || "Sign up failed.");
@@ -102,19 +83,16 @@ const EmployeeFormPage = () => {
   return (
     <ScrollView contentContainerStyle={styles.screen}>
       <View style={styles.card}>
-        <Text style={styles.title}>Employee Sign Up</Text>
+        <Text style={styles.title}>Sign Up</Text>
         <Text style={styles.subtitle}>
-          Create an employee account with your details.
+          Create an account with your details.
         </Text>
 
-        <Formik<EmployeeFormValues>
+        <Formik<SignUpFormValues>
           initialValues={{
-            employeeName: "",
+            name: "",
             email: "",
             phone: "",
-            department: "",
-            position: "",
-            employeeId: "",
             password: "",
             confirmPassword: "",
             acceptTerms: false,
@@ -133,16 +111,16 @@ const EmployeeFormPage = () => {
           }) => (
             <View style={{ width: "100%" }}>
               {/* Employee Name */}
-              <Text style={styles.label}>Employee Name</Text>
+              <Text style={styles.label}>Name</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Enter full name"
-                value={values.employeeName}
-                onChangeText={handleChange("employeeName")}
-                onBlur={handleBlur("employeeName")}
+                value={values.name}
+                onChangeText={handleChange("name")}
+                onBlur={handleBlur("name")}
               />
-              {touched.employeeName && errors.employeeName && (
-                <Text style={styles.error}>{errors.employeeName}</Text>
+              {touched.name && errors.name && (
+                <Text style={styles.error}>{errors.name}</Text>
               )}
 
               {/* Email */}
@@ -172,45 +150,6 @@ const EmployeeFormPage = () => {
               />
               {touched.phone && errors.phone && (
                 <Text style={styles.error}>{errors.phone}</Text>
-              )}
-
-              {/* Department */}
-              <Text style={styles.label}>Department</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. HR, IT, Finance"
-                value={values.department}
-                onChangeText={handleChange("department")}
-                onBlur={handleBlur("department")}
-              />
-              {touched.department && errors.department && (
-                <Text style={styles.error}>{errors.department}</Text>
-              )}
-
-              {/* Position */}
-              <Text style={styles.label}>Position</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. Manager, Developer"
-                value={values.position}
-                onChangeText={handleChange("position")}
-                onBlur={handleBlur("position")}
-              />
-              {touched.position && errors.position && (
-                <Text style={styles.error}>{errors.position}</Text>
-              )}
-
-              {/* Employee ID */}
-              <Text style={styles.label}>Employee ID</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. EMP001"
-                value={values.employeeId}
-                onChangeText={handleChange("employeeId")}
-                onBlur={handleBlur("employeeId")}
-              />
-              {touched.employeeId && errors.employeeId && (
-                <Text style={styles.error}>{errors.employeeId}</Text>
               )}
 
               {/* Password */}
@@ -297,7 +236,7 @@ const EmployeeFormPage = () => {
   );
 };
 
-export default EmployeeFormPage;
+export default SignUpForm;
 
 const styles = StyleSheet.create({
   screen: {
